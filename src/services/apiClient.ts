@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
 
 type ApiOptions = Omit<RequestInit, "body"> & { body?: unknown };
 
@@ -11,7 +11,9 @@ export const apiFetch = async <T>(path: string, options: ApiOptions = {}, token?
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  const response = await fetch(`${API_BASE_URL}${normalizedPath}`, {
     ...options,
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined

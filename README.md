@@ -62,6 +62,8 @@ PORT=4000
 VITE_API_URL=http://localhost:4000
 ```
 
+`VITE_API_URL` não deve ter barra no final (ex: `https://tibia-premium-farm-calculator.fly.dev`).
+
 ## Scripts Úteis
 
 ### Frontend
