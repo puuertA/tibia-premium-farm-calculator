@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for tibia-premium-farm-calculator on 2026-05-12T05:11:56Z
+# fly.toml app configuration file generated for tibia-premium-farm-calculator on 2026-05-12T13:50:16Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -7,10 +7,10 @@ app = 'tibia-premium-farm-calculator'
 primary_region = 'gru'
 
 [build]
-  dockerfile = "server/Dockerfile"
+  dockerfile = 'server/Dockerfile'
 
 [env]
-  PORT = "8080"
+  PORT = '8080'
 
 [http_service]
   internal_port = 8080
