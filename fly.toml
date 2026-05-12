@@ -7,6 +7,10 @@ app = 'tibia-premium-farm-calculator'
 primary_region = 'gru'
 
 [build]
+  dockerfile = "server/Dockerfile"
+
+[env]
+  PORT = "8080"
 
 [http_service]
   internal_port = 8080

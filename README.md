@@ -83,6 +83,34 @@ npm run build
 npm start
 ```
 
+## Deploy (Fly.io)
+
+Este projeto usa o backend em `server/`. O Fly precisa apontar para o Dockerfile do backend:
+
+```toml
+[build]
+	dockerfile = "server/Dockerfile"
+
+[env]
+	PORT = "8080"
+```
+
+### Deploy
+
+```powershell
+fly deploy
+```
+
+### Secrets recomendados
+
+```powershell
+fly secrets set JWT_SECRET="sua-chave"
+fly secrets set DATABASE_URL="file:./dev.db"
+fly secrets set CORS_ORIGIN="https://tibiapremiumfarmcalculator.netlify.app"
+```
+
+`CORS_ORIGIN` deve ser a URL exata do frontend em produção.
+
 ### Prisma
 
 ```powershell
