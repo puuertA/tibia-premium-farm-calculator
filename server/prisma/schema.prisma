@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String  @id @default(cuid())
+  name          String
+  email         String  @unique
+  passwordHash  String  @map("password_hash")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  lastLoginAt   DateTime? @map("last_login_at")
+
+  characters             Character[]
+  premiumTimeRecords     PremiumTimeRecord[]
+  tibiaCoinPriceHistory  TibiaCoinPriceHistory[]
+  farmGoalHistory        FarmGoalHistory[]
+  huntSessionHistory     HuntSessionHistory[]
+
+  @@map("users")
+}
+
+model Character {
+  id                 String   @id @default(cuid())
+  userId             String   @map("user_id")
+  name               String
+  world              String?
+  vocation           String?
+  level              Int?
+  sex                String?
+  achievementPoints  Int?     @map("achievement_points")
+  residence          String?
+  guild              String?
+  skillsJson         Json?    @map("skills_json")
+  lastLogin          DateTime? @map("last_login")
+  isActive           Boolean  @default(false) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user                User                @relation(fields: [userId], references: [id])
+  premiumTimeRecords  PremiumTimeRecord[]
+  tibiaCoinPriceHistory TibiaCoinPriceHistory[]
+  farmGoalHistory       FarmGoalHistory[]
+  huntSessionHistory    HuntSessionHistory[]
+
+  @@map("characters")
+}
+
+model HuntSessionHistory {
+  id                  String   @id @default(cuid())
+  userId              String   @map("user_id")
+  characterId         String?  @map("character_id")
+  sourceFileName      String?  @map("source_file_name")
+  sessionStart        DateTime? @map("session_start")
+  sessionEnd          DateTime? @map("session_end")
+  sessionLength       String   @map("session_length")
+  balance             Float
+  loot                Float
+  supplies            Float
+  xpGain              Float    @map("xp_gain")
+  xpPerHour           Float    @map("xp_per_hour")
+  profitPerHour       Float    @map("profit_per_hour")
+  damage              Float
+  damagePerHour       Float    @map("damage_per_hour")
+  healing             Float
+  healingPerHour      Float    @map("healing_per_hour")
+  totalMonstersKilled Int      @map("total_monsters_killed")
+  mostKilledMonster   String?  @map("most_killed_monster")
+  totalLootedItems    Int      @map("total_looted_items")
+  killedMonstersJson   Json     @map("killed_monsters_json")
+  lootedItemsJson      Json     @map("looted_items_json")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  user       User      @relation(fields: [userId], references: [id])
+  character   Character? @relation(fields: [characterId], references: [id])
+
+  @@index([userId, createdAt])
+  @@map("hunt_session_history")
+}
+
+model PremiumTimeRecord {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  characterId       String?  @map("character_id")
+  originalText      String   @map("original_text")
+  expiresAt         DateTime? @map("expires_at")
+  balanceDays       Int?     @map("balance_days")
+  remainingTimeText String?  @map("remaining_time_text")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  user       User      @relation(fields: [userId], references: [id])
+  character  Character? @relation(fields: [characterId], references: [id])
+
+  @@map("premium_time_records")
+}
+
+model TibiaCoinPriceHistory {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  characterId String?  @map("character_id")
+  world       String?
+  unitPrice   Float    @map("unit_price")
+  price250Tc  Float    @map("price_250_tc")
+  source      String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user       User      @relation(fields: [userId], references: [id])
+  character  Character? @relation(fields: [characterId], references: [id])
+
+  @@map("tibia_coin_price_history")
+}
+
+model FarmGoalHistory {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  characterId   String?  @map("character_id")
+  currentGold   Float    @map("current_gold")
+  targetTcAmount Int     @map("target_tc_amount")
+  unitTcPrice   Float    @map("unit_tc_price")
+  requiredGold  Float    @map("required_gold")
+  missingGold   Float    @map("missing_gold")
+  remainingDays Int      @map("remaining_days")
+  goldPerDay    Float    @map("gold_per_day")
+  goldPerHour   Float    @map("gold_per_hour")
+  hoursPerDay   Float    @map("hours_per_day")
+  status        String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user       User      @relation(fields: [userId], references: [id])
+  character  Character? @relation(fields: [characterId], references: [id])
+
+  @@map("farm_goal_history")
+}
