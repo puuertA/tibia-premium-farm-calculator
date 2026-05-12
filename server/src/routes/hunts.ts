@@ -56,7 +56,7 @@ router.get("/history", requireAuth, async (req, res) => {
     ORDER BY created_at DESC
   `;
 
-  return res.json({ records: records.map((record) => mapHuntSessionRow(record as never)) });
+  return res.json({ records: records.map((record: Record<string, unknown>) => mapHuntSessionRow(record as never)) });
 });
 
 router.post("/import", requireAuth, async (req, res) => {

@@ -44,7 +44,7 @@ router.get("/summary", requireAuth, async (req, res) => {
   `;
 
   const huntLatest = huntLatestRows[0] ? mapHuntSessionRow(huntLatestRows[0] as never) : null;
-  const huntHistory = huntHistoryRows.map((record) => mapHuntSessionRow(record as never));
+  const huntHistory = huntHistoryRows.map((record: Record<string, unknown>) => mapHuntSessionRow(record as never));
 
   return res.json({
     user: {
