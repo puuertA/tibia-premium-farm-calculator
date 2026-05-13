@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { randomUUID } from "crypto";
 import { z } from "zod";
-import prisma from "../prisma";
-import { requireAuth, type AuthRequest } from "../middleware/auth";
-import { toDate } from "../utils/date";
-import { mapHuntSessionRow } from "../utils/huntSession";
+import prisma from "../prisma.js";
+import { requireAuth, type AuthRequest } from "../middleware/auth.js";
+import { toDate } from "../utils/date.js";
+import { mapHuntSessionRow } from "../utils/huntSession.js";
 
 const router = Router();
 

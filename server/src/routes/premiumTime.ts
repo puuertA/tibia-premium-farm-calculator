@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
-import prisma from "../prisma";
-import { requireAuth, type AuthRequest } from "../middleware/auth";
-import { toDate } from "../utils/date";
+import prisma from "../prisma.js";
+import { requireAuth, type AuthRequest } from "../middleware/auth.js";
+import { toDate } from "../utils/date.js";
 
 const router = Router();
 

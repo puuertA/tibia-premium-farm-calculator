@@ -1,14 +1,14 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth";
-import userRoutes from "./routes/users";
-import characterRoutes from "./routes/characters";
-import premiumTimeRoutes from "./routes/premiumTime";
-import tibiaCoinRoutes from "./routes/tibiaCoin";
-import farmGoalRoutes from "./routes/farmGoal";
-import dashboardRoutes from "./routes/dashboard";
-import huntRoutes from "./routes/hunts";
+import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/users.js";
+import characterRoutes from "./routes/characters.js";
+import premiumTimeRoutes from "./routes/premiumTime.js";
+import tibiaCoinRoutes from "./routes/tibiaCoin.js";
+import farmGoalRoutes from "./routes/farmGoal.js";
+import dashboardRoutes from "./routes/dashboard.js";
+import huntRoutes from "./routes/hunts.js";
 
 dotenv.config();
 
