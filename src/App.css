@@ -31,6 +31,25 @@
 	letter-spacing: -0.02em;
 }
 
+.header-title-row {
+	display: inline-flex;
+	align-items: center;
+	gap: 0;
+}
+
+.header-title-icon {
+	width: 20em;
+	height: 20em;
+	object-fit: contain;
+	image-rendering: pixelated;
+	margin-left: -5em;
+	margin-bottom: -5em;
+}
+
+.header-title-row .header-title {
+	margin-left: -2em;
+}
+
 .header-subtitle {
 	color: #94a3b8;
 	font-size: 1rem;

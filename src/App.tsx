@@ -76,6 +76,7 @@ import { Dashboard } from "./components/Dashboard";
 import { useAuth } from "./contexts/AuthContext";
 import coinIcon from "./assets/placeholders/tc-coin.gif";
 import ornament from "./assets/placeholders/ornament.svg";
+import crownIcon from "./assets/pacrowns/premiumtime_30d.png";
 
 const STORAGE_KEY = "tibia-premium-calculator";
 const COIN_TARGET = 250;
@@ -814,7 +815,10 @@ function App() {
           <div className="header-row">
             <div className="header-copy">
               <span className="badge header-badge">Market + Premium Planner</span>
-              <h1 className="header-title">Tibia Premium Calculator</h1>
+              <div className="header-title-row">
+                <img className="header-title-icon" src={crownIcon} alt="Coroa" />
+                <h1 className="header-title">Tibia Premium Calculator</h1>
+              </div>
               <p className="header-subtitle">
                 Dashboard para planejar Premium Time, Tibia Coins e metas de farm.
               </p>
