@@ -121,6 +121,7 @@ function App() {
   const [premiumHistory, setPremiumHistory] = useState<PremiumTimeRecord[]>([]);
   const [coinHistory, setCoinHistory] = useState<TibiaCoinPriceRecord[]>([]);
   const [farmHistory, setFarmHistory] = useState<FarmGoalRecord[]>([]);
+  const [storedPremiumRecord, setStoredPremiumRecord] = useState<PremiumTimeRecord | null>(null);
 
   const [character, setCharacter] = useState<CharacterInfo | null>(null);
   const [marketPrice, setMarketPrice] = useState<MarketPriceResult | null>(null);
@@ -219,8 +220,29 @@ function App() {
   ]);
 
   useEffect(() => {
-    setPremiumInfo(parsePremiumText(premiumText));
-  }, [premiumText]);
+    if (premiumText.trim().length > 0) {
+      setPremiumInfo(parsePremiumText(premiumText));
+      return;
+    }
+
+    if (storedPremiumRecord) {
+      const createdAt = new Date(storedPremiumRecord.createdAt);
+      const expiresAt = storedPremiumRecord.expiresAt
+        ? new Date(storedPremiumRecord.expiresAt)
+        : storedPremiumRecord.balanceDays
+          ? new Date(createdAt.getTime() + storedPremiumRecord.balanceDays * 24 * 60 * 60 * 1000)
+          : undefined;
+
+      setPremiumInfo({
+        rawText: storedPremiumRecord.originalText,
+        expiresAt,
+        balanceDays: storedPremiumRecord.balanceDays ?? undefined
+      });
+      return;
+    }
+
+    setPremiumInfo({ rawText: "" });
+  }, [premiumText, storedPremiumRecord]);
 
   const hasPremiumInfo = Boolean(premiumInfo.expiresAt || premiumInfo.balanceDays);
   const canProceedSetup = Boolean(characterName.trim()) && Boolean(world.trim()) && hasPremiumInfo;
@@ -309,6 +331,7 @@ function App() {
       setCoinHistory(summary.history.tibiaCoin);
       setFarmHistory(summary.history.farmGoal);
       setHuntHistory(summary.history.huntSession);
+      setStoredPremiumRecord(summary.latest.premiumTime ?? null);
 
       const historyEntries = summary.history.tibiaCoin
         .slice()
@@ -321,7 +344,7 @@ function App() {
         }));
       setPriceHistory(historyEntries);
 
-      if (summary.latest.premiumTime) {
+      if (summary.latest.premiumTime?.originalText && premiumText.trim().length === 0) {
         setPremiumText(summary.latest.premiumTime.originalText);
       }
 
@@ -366,6 +389,8 @@ function App() {
         setCharacterName(summary.activeCharacter.name);
         setWorld(summary.activeCharacter.world ?? "");
         setCharacter(mapCharacterRecord(summary.activeCharacter));
+        setStage("calc");
+        setDashboardSection("resumo");
       }
     } catch (error) {
       console.error("Erro ao carregar dashboard:", error);

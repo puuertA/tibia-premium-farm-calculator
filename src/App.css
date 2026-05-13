@@ -751,6 +751,27 @@
 	border-bottom: 1px solid rgba(148, 163, 184, 0.12);
 }
 
+.character-row-info {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.character-row-text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.character-row-name {
+	font-size: 1rem;
+}
+
+.character-row-text .muted {
+	display: block;
+}
+
 .row-actions {
 	display: flex;
 	gap: 8px;

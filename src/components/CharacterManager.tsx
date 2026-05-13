@@ -1,6 +1,7 @@
 import { FileText, Puzzle } from "lucide-react";
 import { useState } from "react";
 import type { CharacterRecord } from "../types/backend";
+import { tibiaWorlds } from "../utils/worlds";
 
 interface CharacterManagerProps {
   characters: CharacterRecord[];
@@ -56,7 +57,14 @@ export const CharacterManager = ({ characters, onCreate, onUpdate, onRemove, onS
         </label>
         <label className="form-field form-group">
           <span>Mundo</span>
-          <input className="input" value={world} onChange={(event) => setWorld(event.target.value)} />
+          <select className="input" value={world} onChange={(event) => setWorld(event.target.value)}>
+            <option value="">Selecione...</option>
+            {tibiaWorlds.map((entry) => (
+              <option key={entry} value={entry}>
+                {entry}
+              </option>
+            ))}
+          </select>
         </label>
         <button type="button" className="primary-button" onClick={handleCreate}>
           Adicionar personagem
@@ -81,9 +89,11 @@ export const CharacterManager = ({ characters, onCreate, onUpdate, onRemove, onS
         <div className="character-list">
           {characters.map((character) => (
             <div key={character.id} className="character-row">
-              <div>
-                <strong>{character.name}</strong>
-                <span className="muted">{character.world ?? "Mundo"}</span>
+              <div className="character-row-info">
+                <div className="character-row-text">
+                  <strong className="character-row-name">{character.name}</strong>
+                  <span className="muted">{character.world ?? "Mundo"}</span>
+                </div>
                 {character.isActive && <span className="badge badge-success">Ativo</span>}
               </div>
               <div className="row-actions">
@@ -112,7 +122,18 @@ export const CharacterManager = ({ characters, onCreate, onUpdate, onRemove, onS
             </label>
             <label className="form-field form-group">
               <span>Mundo</span>
-              <input className="input" value={editingWorld} onChange={(event) => setEditingWorld(event.target.value)} />
+              <select
+                className="input"
+                value={editingWorld}
+                onChange={(event) => setEditingWorld(event.target.value)}
+              >
+                <option value="">Selecione...</option>
+                {tibiaWorlds.map((entry) => (
+                  <option key={entry} value={entry}>
+                    {entry}
+                  </option>
+                ))}
+              </select>
             </label>
             <button type="button" className="primary-button" onClick={handleUpdate}>
               Salvar alterações

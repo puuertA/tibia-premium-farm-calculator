@@ -1,4 +1,5 @@
 import { ArrowRight, Settings } from "lucide-react";
+import { tibiaWorlds } from "../utils/worlds";
 
 interface SettingsFormProps {
   mode: "setup" | "calc";
@@ -78,12 +79,18 @@ export const SettingsForm = ({
 
         <label className="form-field form-group">
           <span style={{ marginBottom: "6px", display: "inline-block" }}>Mundo / Servidor</span>
-          <input
+          <select
             className="input"
-            placeholder="Ex: Descubra"
             value={world}
             onChange={(event) => onWorldChange(event.target.value)}
-          />
+          >
+            <option value="">Selecione...</option>
+            {tibiaWorlds.map((entry) => (
+              <option key={entry} value={entry}>
+                {entry}
+              </option>
+            ))}
+          </select>
         </label>
 
         {mode === "calc" && (
