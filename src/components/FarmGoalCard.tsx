@@ -1,6 +1,7 @@
 import { AlertTriangle, Target } from "lucide-react";
 import type { FarmGoal } from "../types/tibia";
 import { formatGold } from "../utils/formatGold";
+import { CoinStackBadge } from "./CoinStackBadge";
 
 interface FarmGoalCardProps {
   goal: FarmGoal;
@@ -58,8 +59,9 @@ export const FarmGoalCard = ({
         {!goal.hasEnoughGold && (
           <div className="farm-hero">
             <div className="stat-label">Gold Faltante</div>
-            <div className="big-number" style={{ color: hasExpired ? "#ef4444" : "#f59e0b" }}>
-              {formatGold(goal.missingGold)}
+            <div className="big-number-row" style={{ color: hasExpired ? "#ef4444" : "#f59e0b" }}>
+              <CoinStackBadge amount={goal.missingGold} showCount={false} />
+              <span className="big-number">{formatGold(goal.missingGold)}</span>
             </div>
             <p className="farm-hero-text">{goal.daysRemaining} dias restantes</p>
           </div>
@@ -68,11 +70,17 @@ export const FarmGoalCard = ({
         <div className="farm-stats">
           <div className="stat-card">
             <span className="stat-label">Gold Atual</span>
-            <span className="stat-value">{formatGold(goal.currentGold)}</span>
+            <div className="stat-value-row">
+              <span className="stat-value">{formatGold(goal.currentGold)}</span>
+              <CoinStackBadge amount={goal.currentGold} />
+            </div>
           </div>
           <div className="stat-card">
             <span className="stat-label">Necessário</span>
-            <span className="stat-value">{unitPrice > 0 ? formattedTarget : "—"}</span>
+            <div className="stat-value-row">
+              <span className="stat-value">{unitPrice > 0 ? formattedTarget : "—"}</span>
+              {unitPrice > 0 && <CoinStackBadge amount={targetGold} />}
+            </div>
           </div>
           <div className="stat-card">
             <span className="stat-label">Dias Restantes</span>

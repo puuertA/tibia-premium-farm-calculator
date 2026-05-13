@@ -127,6 +127,7 @@ npx prisma studio
 - `GET /farm-goal/history`
 - `POST /farm-goal/update`
 
+
 ### Dashboard
 
 - `GET /dashboard/summary`

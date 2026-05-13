@@ -856,6 +856,38 @@
 	text-align: right;
 }
 
+.stat-value-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.coin-stack {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.78rem;
+	color: #cbd5f5;
+}
+
+.coin-stack__icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 8px;
+	background: transparent;
+	border: none;
+}
+
+.coin-stack__icon {
+	object-fit: contain;
+	image-rendering: pixelated;
+}
+
+.coin-stack__count {
+	font-weight: 600;
+}
+
 .stat-value--xl {
 	font-size: 1.6rem;
 	font-weight: 700;
@@ -865,6 +897,18 @@
 	font-size: clamp(1.8rem, 2vw + 1.3rem, 2.6rem);
 	font-weight: 700;
 	line-height: 1.1;
+}
+
+.big-number-row {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.big-number-row .coin-stack__icon {
+	width: 5em;
+	height: 5em;
+	border-radius: 0.45em;
 }
 
 .stat-highlight {
