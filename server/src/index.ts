@@ -23,21 +23,28 @@ const hasAllowedOrigins = allowedOrigins.length > 0;
 const corsOptions: cors.CorsOptions = {
   origin: hasAllowedOrigins
     ? (origin, callback) => {
-        const requestOrigin = origin ? normalizeOrigin(origin) : "";
-        if (!origin || allowedOrigins?.includes(requestOrigin)) {
+        if (!origin) {
           callback(null, true);
           return;
         }
 
-        callback(new Error("Origin não permitida pelo CORS"));
+        const requestOrigin = normalizeOrigin(origin);
+        if (allowedOrigins.includes(requestOrigin)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(null, false);
       }
     : "*",
   credentials: hasAllowedOrigins,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (_req, res) => {
