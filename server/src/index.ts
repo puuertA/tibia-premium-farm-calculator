@@ -15,7 +15,6 @@ dotenv.config();
 const app = express();
 const port = Number(process.env.PORT ?? 4000);
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((value) => value.trim());
-<<<<<<< HEAD
 const hasAllowedOrigins = Boolean(allowedOrigins && allowedOrigins.length > 0);
 const corsOptions: cors.CorsOptions = {
   origin: hasAllowedOrigins
@@ -34,15 +33,6 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
-=======
-
-app.use(
-  cors({
-    origin: allowedOrigins && allowedOrigins.length > 0 ? allowedOrigins : "*",
-    credentials: true
-  })
-);
->>>>>>> 98fe8a8 (feat: initialize project with React, TypeScript, and Tailwind CSS)
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (_req, res) => {

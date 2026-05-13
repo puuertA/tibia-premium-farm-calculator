@@ -56,11 +56,7 @@ router.get("/history", requireAuth, async (req, res) => {
     ORDER BY created_at DESC
   `;
 
-<<<<<<< HEAD
   return res.json({ records: records.map((record: Record<string, unknown>) => mapHuntSessionRow(record as never)) });
-=======
-  return res.json({ records: records.map((record) => mapHuntSessionRow(record as never)) });
->>>>>>> 98fe8a8 (feat: initialize project with React, TypeScript, and Tailwind CSS)
 });
 
 router.post("/import", requireAuth, async (req, res) => {
