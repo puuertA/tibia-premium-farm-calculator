@@ -5,6 +5,9 @@ WORKDIR /app
 COPY server/package*.json ./
 RUN npm ci
 
+COPY server/prisma ./prisma
+RUN npx prisma generate
+
 COPY server ./
 RUN npm run build
 
