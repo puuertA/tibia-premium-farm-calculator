@@ -14,15 +14,17 @@ dotenv.config();
 
 const app = express();
 const port = Number(process.env.PORT ?? 4000);
+const normalizeOrigin = (value: string) => value.trim().replace(/\/+$/, "").toLowerCase();
 const allowedOrigins = (process.env.CORS_ORIGIN ?? "")
   .split(",")
-  .map((value) => value.trim())
+  .map((value) => normalizeOrigin(value))
   .filter(Boolean);
 const hasAllowedOrigins = allowedOrigins.length > 0;
 const corsOptions: cors.CorsOptions = {
   origin: hasAllowedOrigins
     ? (origin, callback) => {
-        if (!origin || allowedOrigins?.includes(origin)) {
+        const requestOrigin = origin ? normalizeOrigin(origin) : "";
+        if (!origin || allowedOrigins?.includes(requestOrigin)) {
           callback(null, true);
           return;
         }
@@ -35,6 +37,7 @@ const corsOptions: cors.CorsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (_req, res) => {
