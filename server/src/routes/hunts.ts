@@ -115,8 +115,8 @@ router.post("/import", requireAuth, async (req, res) => {
       ${data.totalMonstersKilled},
       ${data.mostKilledMonster ?? null},
       ${data.totalLootedItems},
-      ${JSON.stringify(data.killedMonstersJson)},
-      ${JSON.stringify(data.lootedItemsJson)},
+      ${JSON.stringify(data.killedMonstersJson)}::jsonb,
+      ${JSON.stringify(data.lootedItemsJson)}::jsonb,
       CURRENT_TIMESTAMP
     )
   `;
