@@ -154,7 +154,23 @@ router.delete("/:id", requireAuth, async (req, res) => {
     return res.status(404).json({ message: "Personagem não encontrado." });
   }
 
-  await prisma.character.delete({ where: { id } });
+  await prisma.$transaction([
+    prisma.premiumTimeRecord.deleteMany({
+      where: { characterId: id }
+    }),
+    prisma.tibiaCoinPriceHistory.deleteMany({
+      where: { characterId: id }
+    }),
+    prisma.farmGoalHistory.deleteMany({
+      where: { characterId: id }
+    }),
+    prisma.huntSessionHistory.deleteMany({
+      where: { characterId: id }
+    }),
+    prisma.character.delete({
+      where: { id }
+    })
+  ]);
   return res.status(204).send();
 });
 
