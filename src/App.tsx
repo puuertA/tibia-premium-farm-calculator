@@ -136,6 +136,8 @@ function App() {
   const [marketLoading, setMarketLoading] = useState(false);
   const [characterError, setCharacterError] = useState<string | null>(null);
   const [marketError, setMarketError] = useState<string | null>(null);
+  const [operationLoading, setOperationLoading] = useState(false);
+  const [operationLabel, setOperationLabel] = useState<string | null>(null);
 
   useEffect(() => {
     if (authBootstrapping || isAuthenticated) return;
@@ -305,6 +307,17 @@ function App() {
     }
     return formatGold(typeof value === "number" ? value : Number(value ?? 0));
   };
+
+  const runWithOperation = useCallback(async (label: string, task: () => Promise<void>) => {
+    setOperationLoading(true);
+    setOperationLabel(label);
+    try {
+      await task();
+    } finally {
+      setOperationLoading(false);
+      setOperationLabel(null);
+    }
+  }, []);
 
   const mapCharacterRecord = (record: CharacterRecord): CharacterInfo => ({
     name: record.name,
@@ -504,42 +517,44 @@ function App() {
       createdAt
     };
 
-    try {
-      if (isAuthenticated && token) {
-        const imported = await huntsApi.importSession(token, {
-          characterId: activeCharacterId ?? null,
-          sourceFileName: huntSession.fileName,
-          sessionStart: huntSession.sessionStart ?? null,
-          sessionEnd: huntSession.sessionEnd ?? null,
-          sessionLength: huntSession.sessionLength,
-          balance: huntSession.balance,
-          loot: huntSession.loot,
-          supplies: huntSession.supplies,
-          xpGain: huntSession.xpGain,
-          xpPerHour: huntSession.xpPerHour,
-          damage: huntSession.damage,
-          damagePerHour: huntSession.damagePerHour,
-          healing: huntSession.healing,
-          healingPerHour: huntSession.healingPerHour,
-          totalMonstersKilled: huntSession.totalMonstersKilled,
-          mostKilledMonster: huntSession.mostKilledMonster ?? null,
-          totalLootedItems: huntSession.totalLootedItems,
-          killedMonstersJson: huntSession.killedMonsters,
-          lootedItemsJson: huntSession.lootedItems
-        });
+    await runWithOperation("Salvando hunt...", async () => {
+      try {
+        if (isAuthenticated && token) {
+          const imported = await huntsApi.importSession(token, {
+            characterId: activeCharacterId ?? null,
+            sourceFileName: huntSession.fileName,
+            sessionStart: huntSession.sessionStart ?? null,
+            sessionEnd: huntSession.sessionEnd ?? null,
+            sessionLength: huntSession.sessionLength,
+            balance: huntSession.balance,
+            loot: huntSession.loot,
+            supplies: huntSession.supplies,
+            xpGain: huntSession.xpGain,
+            xpPerHour: huntSession.xpPerHour,
+            damage: huntSession.damage,
+            damagePerHour: huntSession.damagePerHour,
+            healing: huntSession.healing,
+            healingPerHour: huntSession.healingPerHour,
+            totalMonstersKilled: huntSession.totalMonstersKilled,
+            mostKilledMonster: huntSession.mostKilledMonster ?? null,
+            totalLootedItems: huntSession.totalLootedItems,
+            killedMonstersJson: huntSession.killedMonsters,
+            lootedItemsJson: huntSession.lootedItems
+          });
 
-        setHuntHistory((prev) => [imported.record, ...prev].slice(0, 120));
-        await loadDashboardSummary();
-      } else {
-        setHuntHistory((prev) => [localRecord, ...prev].slice(0, 120));
+          setHuntHistory((prev) => [imported.record, ...prev].slice(0, 120));
+          await loadDashboardSummary();
+        } else {
+          setHuntHistory((prev) => [localRecord, ...prev].slice(0, 120));
+        }
+
+        setCurrentGoldInput(Math.max(0, Math.round(huntSession.balance)).toString());
+        setGoldPerHourInput(Math.max(0, Math.round(huntSession.goldPerHour)).toString());
+      } catch (error) {
+        setHuntImportError(error instanceof Error ? error.message : "Não foi possível salvar a hunt.");
       }
-
-      setCurrentGoldInput(Math.max(0, Math.round(huntSession.balance)).toString());
-      setGoldPerHourInput(Math.max(0, Math.round(huntSession.goldPerHour)).toString());
-    } catch (error) {
-      setHuntImportError(error instanceof Error ? error.message : "Não foi possível salvar a hunt.");
-    }
-  }, [huntSession, isAuthenticated, token, activeCharacterId, loadDashboardSummary]);
+    });
+  }, [huntSession, isAuthenticated, token, activeCharacterId, loadDashboardSummary, runWithOperation]);
 
   const handleClearHuntSession = () => {
     setHuntSession(null);
@@ -640,30 +655,38 @@ function App() {
 
   const handleCreateCharacter = async (payload: { name: string; world?: string }) => {
     if (!token) return;
-    await charactersApi.create(token, {
-      name: payload.name,
-      world: payload.world,
-      isActive: characters.length === 0
+    await runWithOperation("Adicionando personagem...", async () => {
+      await charactersApi.create(token, {
+        name: payload.name,
+        world: payload.world,
+        isActive: characters.length === 0
+      });
+      await loadDashboardSummary();
     });
-    await loadDashboardSummary();
   };
 
   const handleUpdateCharacter = async (id: string, payload: Partial<CharacterRecord>) => {
     if (!token) return;
-    await charactersApi.update(token, id, payload);
-    await loadDashboardSummary();
+    await runWithOperation("Atualizando personagem...", async () => {
+      await charactersApi.update(token, id, payload);
+      await loadDashboardSummary();
+    });
   };
 
   const handleRemoveCharacter = async (id: string) => {
     if (!token) return;
-    await charactersApi.remove(token, id);
-    await loadDashboardSummary();
+    await runWithOperation("Removendo personagem...", async () => {
+      await charactersApi.remove(token, id);
+      await loadDashboardSummary();
+    });
   };
 
   const handleSetActiveCharacter = async (id: string) => {
     if (!token) return;
-    await charactersApi.setActive(token, id);
-    await loadDashboardSummary();
+    await runWithOperation("Trocando personagem ativo...", async () => {
+      await charactersApi.setActive(token, id);
+      await loadDashboardSummary();
+    });
   };
 
   const syncCharacterFromApi = useCallback(
@@ -705,136 +728,144 @@ function App() {
   };
 
   const refreshData = async () => {
-    setCharacterError(null);
-    setMarketError(null);
+    await runWithOperation("Atualizando dados...", async () => {
+      setCharacterError(null);
+      setMarketError(null);
 
-    let resolvedWorld = world.trim();
-    let latestMarket: MarketPriceResult | null = null;
+      let resolvedWorld = world.trim();
+      let latestMarket: MarketPriceResult | null = null;
 
-    if (characterName.trim()) {
-      setCharacterLoading(true);
-      try {
-        const data = await getCharacterInfo(characterName);
-        setCharacter(data);
-        if (isAuthenticated) {
-          await syncCharacterFromApi(data);
+      if (characterName.trim()) {
+        setCharacterLoading(true);
+        try {
+          const data = await getCharacterInfo(characterName);
+          setCharacter(data);
+          if (isAuthenticated) {
+            await syncCharacterFromApi(data);
+          }
+          if (!world.trim() && data.world) {
+            resolvedWorld = data.world;
+            setWorld(data.world);
+          }
+        } catch (error) {
+          setCharacter(null);
+          setCharacterError(error instanceof Error ? error.message : "Erro ao buscar personagem.");
+        } finally {
+          setCharacterLoading(false);
         }
-        if (!world.trim() && data.world) {
-          resolvedWorld = data.world;
-          setWorld(data.world);
+      }
+
+      if (resolvedWorld) {
+        setMarketLoading(true);
+        try {
+          const data = await getTibiaCoinPrice(resolvedWorld);
+          setMarketPrice(data);
+          latestMarket = data;
+          setMarketError(data.success ? null : data.error ?? "Preço indisponível.");
+        } catch (error) {
+          setMarketPrice(null);
+          setMarketError(error instanceof Error ? error.message : "Erro ao buscar preço.");
+        } finally {
+          setMarketLoading(false);
         }
-      } catch (error) {
-        setCharacter(null);
-        setCharacterError(error instanceof Error ? error.message : "Erro ao buscar personagem.");
-      } finally {
-        setCharacterLoading(false);
       }
-    }
 
-    if (resolvedWorld) {
-      setMarketLoading(true);
-      try {
-        const data = await getTibiaCoinPrice(resolvedWorld);
-        setMarketPrice(data);
-        latestMarket = data;
-        setMarketError(data.success ? null : data.error ?? "Preço indisponível.");
-      } catch (error) {
-        setMarketPrice(null);
-        setMarketError(error instanceof Error ? error.message : "Erro ao buscar preço.");
-      } finally {
-        setMarketLoading(false);
+      const source = manualUnitPrice > 0 ? "manual" : latestMarket?.success ? "market" : null;
+      const unitPrice = manualUnitPrice > 0 ? manualUnitPrice : latestMarket?.unitPrice ?? 0;
+
+      if (source && unitPrice > 0) {
+        appendPriceHistory({
+          timestamp: new Date().toISOString(),
+          world: resolvedWorld || "Não informado",
+          unitPrice,
+          source
+        });
       }
-    }
 
-    const source = manualUnitPrice > 0 ? "manual" : latestMarket?.success ? "market" : null;
-    const unitPrice = manualUnitPrice > 0 ? manualUnitPrice : latestMarket?.unitPrice ?? 0;
-
-    if (source && unitPrice > 0) {
-      appendPriceHistory({
-        timestamp: new Date().toISOString(),
-        world: resolvedWorld || "Não informado",
-        unitPrice,
-        source
-      });
-    }
-
-    if (isAuthenticated) {
-      await persistUserData({
-        unitPrice,
-        source: source ?? "manual",
-        resolvedWorld
-      });
-    }
+      if (isAuthenticated) {
+        await persistUserData({
+          unitPrice,
+          source: source ?? "manual",
+          resolvedWorld
+        });
+      }
+    });
   };
 
   const proceedToCalculator = async () => {
     if (!canProceedSetup) return;
     setStage("calc");
 
-    setCharacterError(null);
-    setMarketError(null);
+    await runWithOperation("Abrindo calculadora...", async () => {
+      setCharacterError(null);
+      setMarketError(null);
 
-    let resolvedWorld = world.trim();
-    let latestMarket: MarketPriceResult | null = null;
+      let resolvedWorld = world.trim();
+      let latestMarket: MarketPriceResult | null = null;
 
-    if (characterName.trim()) {
-      setCharacterLoading(true);
-      try {
-        const data = await getCharacterInfo(characterName);
-        setCharacter(data);
-        if (isAuthenticated) {
-          await syncCharacterFromApi(data);
+      if (characterName.trim()) {
+        setCharacterLoading(true);
+        try {
+          const data = await getCharacterInfo(characterName);
+          setCharacter(data);
+          if (isAuthenticated) {
+            await syncCharacterFromApi(data);
+          }
+          if (!resolvedWorld && data.world) {
+            resolvedWorld = data.world;
+            setWorld(data.world);
+          }
+        } catch (error) {
+          setCharacter(null);
+          setCharacterError(error instanceof Error ? error.message : "Erro ao buscar personagem.");
+        } finally {
+          setCharacterLoading(false);
         }
-        if (!resolvedWorld && data.world) {
-          resolvedWorld = data.world;
-          setWorld(data.world);
+      }
+
+      if (resolvedWorld) {
+        setMarketLoading(true);
+        try {
+          const data = await getTibiaCoinPrice(resolvedWorld);
+          setMarketPrice(data);
+          latestMarket = data;
+          setMarketError(data.success ? null : data.error ?? "Preço indisponível.");
+        } catch (error) {
+          setMarketPrice(null);
+          setMarketError(error instanceof Error ? error.message : "Erro ao buscar preço.");
+        } finally {
+          setMarketLoading(false);
         }
-      } catch (error) {
-        setCharacter(null);
-        setCharacterError(error instanceof Error ? error.message : "Erro ao buscar personagem.");
-      } finally {
-        setCharacterLoading(false);
       }
-    }
 
-    if (resolvedWorld) {
-      setMarketLoading(true);
-      try {
-        const data = await getTibiaCoinPrice(resolvedWorld);
-        setMarketPrice(data);
-        latestMarket = data;
-        setMarketError(data.success ? null : data.error ?? "Preço indisponível.");
-      } catch (error) {
-        setMarketPrice(null);
-        setMarketError(error instanceof Error ? error.message : "Erro ao buscar preço.");
-      } finally {
-        setMarketLoading(false);
+      const source = manualUnitPrice > 0 ? "manual" : latestMarket?.success ? "market" : null;
+      const unitPrice = manualUnitPrice > 0 ? manualUnitPrice : latestMarket?.unitPrice ?? 0;
+
+      if (source && unitPrice > 0) {
+        appendPriceHistory({
+          timestamp: new Date().toISOString(),
+          world: resolvedWorld || "Não informado",
+          unitPrice,
+          source
+        });
       }
-    }
 
-    const source = manualUnitPrice > 0 ? "manual" : latestMarket?.success ? "market" : null;
-    const unitPrice = manualUnitPrice > 0 ? manualUnitPrice : latestMarket?.unitPrice ?? 0;
-
-    if (source && unitPrice > 0) {
-      appendPriceHistory({
-        timestamp: new Date().toISOString(),
-        world: resolvedWorld || "Não informado",
-        unitPrice,
-        source
-      });
-    }
-
-    if (isAuthenticated) {
-      await persistUserData({
-        unitPrice,
-        source: source ?? "manual",
-        resolvedWorld
-      });
-    }
+      if (isAuthenticated) {
+        await persistUserData({
+          unitPrice,
+          source: source ?? "manual",
+          resolvedWorld
+        });
+      }
+    });
   };
 
+  const isProcessing = authLoading || characterLoading || marketLoading || huntImportLoading || operationLoading;
+  const processingLabel =
+    operationLabel ?? (huntImportLoading ? "Processando hunt..." : characterLoading || marketLoading ? "Buscando dados..." : null);
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isProcessing ? "is-processing" : ""}`}>
       <header className="app-header">
         <div className="container">
           <div className="header-row">
@@ -884,7 +915,7 @@ function App() {
         </div>
       </header>
 
-      <main className="container dashboard">
+      <main className="container dashboard" aria-busy={isProcessing}>
         {!authBootstrapping && !isAuthenticated && (
           <AccountRequiredBanner onLogin={() => openAuth("login")} onRegister={() => openAuth("register")} />
         )}
@@ -1448,6 +1479,16 @@ function App() {
           </>
         )}
       </main>
+
+      {isProcessing && (
+        <div className="processing-overlay" role="status" aria-live="polite">
+          <div className="processing-overlay__panel">
+            <span className="processing-spinner" aria-hidden="true" />
+            <p className="processing-overlay__title">{processingLabel ?? "Processando..."}</p>
+            <p className="processing-overlay__text">Aguarde só um instante.</p>
+          </div>
+        </div>
+      )}
 
       {showAuth && (
         <AuthPage

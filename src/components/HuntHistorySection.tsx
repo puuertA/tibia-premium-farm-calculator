@@ -27,6 +27,13 @@ interface HuntHistorySectionProps {
 const colors = ["#38bdf8", "#22c55e", "#f97316", "#a855f7", "#f59e0b", "#ef4444"];
 
 const numberTooltip = (value: unknown) => formatGold(Number(value ?? 0));
+const formatChartLabel = (value: string) =>
+  new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
 export const HuntHistorySection = ({
   records,
@@ -101,10 +108,15 @@ export const HuntHistorySection = ({
                   <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={insights.chartPoints} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                       <CartesianGrid stroke="rgba(148, 163, 184, 0.15)" strokeDasharray="5 5" />
-                      <XAxis dataKey="date" tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                      <XAxis
+                        dataKey="createdAt"
+                        tick={{ fill: "#94a3b8", fontSize: 11 }}
+                        tickFormatter={formatChartLabel}
+                      />
                       <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} />
                       <Tooltip
                         formatter={numberTooltip as any}
+                        labelFormatter={(value) => formatChartLabel(String(value))}
                         contentStyle={{
                           background: "#0f172a",
                           borderRadius: "12px",
@@ -133,10 +145,15 @@ export const HuntHistorySection = ({
                   <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={insights.chartPoints} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                       <CartesianGrid stroke="rgba(148, 163, 184, 0.15)" strokeDasharray="5 5" />
-                      <XAxis dataKey="date" tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                      <XAxis
+                        dataKey="createdAt"
+                        tick={{ fill: "#94a3b8", fontSize: 11 }}
+                        tickFormatter={formatChartLabel}
+                      />
                       <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} />
                       <Tooltip
                         formatter={numberTooltip as any}
+                        labelFormatter={(value) => formatChartLabel(String(value))}
                         contentStyle={{
                           background: "#0f172a",
                           borderRadius: "12px",
@@ -165,10 +182,15 @@ export const HuntHistorySection = ({
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={insights.chartPoints} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                       <CartesianGrid stroke="rgba(148, 163, 184, 0.15)" strokeDasharray="5 5" />
-                      <XAxis dataKey="date" tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                      <XAxis
+                        dataKey="createdAt"
+                        tick={{ fill: "#94a3b8", fontSize: 11 }}
+                        tickFormatter={formatChartLabel}
+                      />
                       <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} />
                       <Tooltip
                         formatter={numberTooltip as any}
+                        labelFormatter={(value) => formatChartLabel(String(value))}
                         contentStyle={{
                           background: "#0f172a",
                           borderRadius: "12px",

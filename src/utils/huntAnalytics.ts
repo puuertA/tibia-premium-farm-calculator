@@ -2,7 +2,8 @@ import type { HuntSessionRecord } from "../types/backend";
 
 export interface HuntChartPoint {
   id: string;
-  date: string;
+  createdAt: string;
+  label: string;
   profit: number;
   xpPerHour: number;
   profitPerHour: number;
@@ -36,8 +37,13 @@ export interface HuntInsights {
   hoursPerDayNeeded: number;
 }
 
-const toDateLabel = (value: string) =>
-  new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+const toChartLabel = (value: string) =>
+  new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
 export const calculateHuntInsights = (
   records: HuntSessionRecord[],
@@ -88,10 +94,11 @@ export const calculateHuntInsights = (
   const mostFarmedMonster = topMonsters[0] ?? null;
   const chartPoints = records
     .slice()
-    .reverse()
+    .sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime())
     .map((record) => ({
       id: record.id,
-      date: toDateLabel(record.createdAt),
+      createdAt: record.createdAt,
+      label: toChartLabel(record.createdAt),
       profit: record.balance,
       xpPerHour: record.xpPerHour,
       profitPerHour: record.profitPerHour
